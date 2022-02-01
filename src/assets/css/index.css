@@ -1,0 +1,51 @@
+.card__section {
+  display: flex;
+  justify-content: space-around;
+}
+
+.card__product {
+  width: 13rem;
+  background-color: #f5f6f8;
+  align-items: center;
+  padding: 1.3em;
+  margin-top: 60px;
+  border-radius: 10px !important;
+  border-color: #dedede !important;
+}
+
+.card__product--img {
+  height: 14em;
+  width: 11em !important;
+}
+
+.card__product--desc {
+  padding-bottom: 0;
+}
+
+.card__product--title {
+  text-align: center;
+}
+
+.card__product--stock {
+  text-align: center;
+  color: #a0a3bd;
+  font-size: 12px;
+}
+
+.card__product--price {
+  text-align: center;
+  color: #000000;
+  font-size: 16px;
+}
+
+.card__product--button--update {
+  width: 100%;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.card__product--button--delete {
+  width: 100%;
+  font-size: 13px;
+  margin-top: 10px;
+}
