@@ -1,11 +1,24 @@
 import React from "react";
-import { Container, Row, Button, Form, Card, Modal } from "react-bootstrap";
+import { Container, Row, Col, Button, FormControl, Card, Modal, InputGroup } from "react-bootstrap";
+import { Search } from "react-bootstrap-icons";
 
 const Product = () => {
   return (
     <>
-      <Container>
-        <Row></Row>
+      <Container className="mt-4">
+        <Row>
+          <Col md={2}>
+            <Button>Add product</Button>
+          </Col>
+          <Col md={10}>
+            <InputGroup className="mb-1">
+              <InputGroup.Text>
+                <Search color="black" size={16} />
+              </InputGroup.Text>
+              <FormControl placeholder="Cari produk disini..." />
+            </InputGroup>
+          </Col>
+        </Row>
         <Row className="card__section">
           <Card className="card__product">
             <Card.Img
