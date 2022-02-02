@@ -1,19 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Container, Row, Col, Button, Form, Card, Modal, InputGroup } from "react-bootstrap";
 import { Search } from "react-bootstrap-icons";
+import { getDataProduct } from "../stores/actions/product";
 
 const Product = () => {
+  const dispatch = useDispatch();
+
   const [show, setShow] = useState(false);
+  const [products, setProducts] = useState([]);
+
+  const getAllProduct = async () => {
+    try {
+      const response = await dispatch(getDataProduct("", "", "", "", 4));
+      setProducts(response.value.data.data);
+    } catch (error) {
+      Error(error.response);
+    }
+  };
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  useEffect(() => {
+    getAllProduct();
+  }, []);
 
   return (
     <>
       <Container className="mt-4">
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
-            <Modal.Title>Add product</Modal.Title>
+            <Modal.Title>Tambah produk</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form>
@@ -46,7 +64,7 @@ const Product = () => {
         </Modal>
         <Row>
           <Col md={2}>
-            <Button onClick={handleShow}>Add product</Button>
+            <Button onClick={handleShow}>Tambah produk</Button>
           </Col>
           <Col md={10}>
             <InputGroup className="mb-1">
@@ -58,72 +76,43 @@ const Product = () => {
           </Col>
         </Row>
         <Row className="card__section">
-          <Card className="card__product">
-            <Card.Img
-              variant="top"
-              className="card__product--img"
-              src="https://www.a1hosting.net/wp-content/themes/arkahost/assets/images/default.jpg"
-            />
-            <Card.Body className="card__product--desc">
-              <Card.Title className="card__product--title">Product 1</Card.Title>
-              <Card.Text className="card__product--stock">Stok 2</Card.Text>
-              <Card.Text className="card__product--price">Rp. 10.000</Card.Text>
-              <Button className="card__product--button--update" onClick={handleShow}>
-                Update
-              </Button>
-              <Button variant="danger" className="card__product--button--delete">
-                Delete
-              </Button>
-            </Card.Body>
-          </Card>
-          <Card className="card__product">
-            <Card.Img
-              variant="top"
-              className="card__product--img"
-              src="https://www.a1hosting.net/wp-content/themes/arkahost/assets/images/default.jpg"
-            />
-            <Card.Body className="card__product--desc">
-              <Card.Title className="card__product--title">Product 1</Card.Title>
-              <Card.Text className="card__product--stock">Stok 2</Card.Text>
-              <Card.Text className="card__product--price">Rp. 10.000</Card.Text>
-              <Button className="card__product--button--update">Update</Button>
-              <Button variant="danger" className="card__product--button--delete">
-                Delete
-              </Button>
-            </Card.Body>
-          </Card>
-          <Card className="card__product">
-            <Card.Img
-              variant="top"
-              className="card__product--img"
-              src="https://www.a1hosting.net/wp-content/themes/arkahost/assets/images/default.jpg"
-            />
-            <Card.Body className="card__product--desc">
-              <Card.Title className="card__product--title">Product 1</Card.Title>
-              <Card.Text className="card__product--stock">Stok 2</Card.Text>
-              <Card.Text className="card__product--price">Rp. 10.000</Card.Text>
-              <Button className="card__product--button--update">Update</Button>
-              <Button variant="danger" className="card__product--button--delete">
-                Delete
-              </Button>
-            </Card.Body>
-          </Card>
-          <Card className="card__product">
-            <Card.Img
-              variant="top"
-              className="card__product--img"
-              src="https://www.a1hosting.net/wp-content/themes/arkahost/assets/images/default.jpg"
-            />
-            <Card.Body className="card__product--desc">
-              <Card.Title className="card__product--title">Product 1</Card.Title>
-              <Card.Text className="card__product--stock">Stok 2</Card.Text>
-              <Card.Text className="card__product--price">Rp. 10.000</Card.Text>
-              <Button className="card__product--button--update">Update</Button>
-              <Button variant="danger" className="card__product--button--delete">
-                Delete
-              </Button>
-            </Card.Body>
-          </Card>
+          {products.length > 0 ? (
+            products.map((item) => {
+              const number = item.price;
+              const rupiah = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0
+              }).format(number);
+              const newItem = { ...item, price: rupiah };
+              return (
+                <Card className="card__product" key={newItem.id}>
+                  <Card.Img
+                    variant="top"
+                    className="card__product--img"
+                    src={
+                      newItem.productImage
+                        ? `${process.env.REACT_APP_URL_BACKEND}uploads/${newItem.productImage}`
+                        : "https://www.a1hosting.net/wp-content/themes/arkahost/assets/images/default.jpg"
+                    }
+                  />
+                  <Card.Body className="card__product--desc">
+                    <Card.Title className="card__product--title">{newItem.productName}</Card.Title>
+                    <Card.Text className="card__product--stock">Stok {newItem.stock}</Card.Text>
+                    <Card.Text className="card__product--price">{newItem.price}</Card.Text>
+                    <Button className="card__product--button--update" onClick={handleShow}>
+                      Update
+                    </Button>
+                    <Button variant="danger" className="card__product--button--delete">
+                      Delete
+                    </Button>
+                  </Card.Body>
+                </Card>
+              );
+            })
+          ) : (
+            <h1 className="text-center mb-5 pb-4">No Data</h1>
+          )}
         </Row>
         <Row></Row>
       </Container>
