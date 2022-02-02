@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Container, Row, Col, Button, Form, Card, Modal, InputGroup } from "react-bootstrap";
 import { Search } from "react-bootstrap-icons";
+import Pagination from "react-paginate";
 import { getDataProduct } from "../stores/actions/product";
 
 const Product = () => {
@@ -9,14 +10,24 @@ const Product = () => {
 
   const [show, setShow] = useState(false);
   const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [paginate, setPaginate] = useState({ limit: 4, totalPage: 1 });
 
   const getAllProduct = async () => {
     try {
-      const response = await dispatch(getDataProduct("", "", "", "", 4));
+      const response = await dispatch(getDataProduct("", "", "", page, paginate.limit));
       setProducts(response.value.data.data);
+      setPaginate({ ...paginate, totalPage: response.value.data.pagination.totalPage });
     } catch (error) {
       Error(error.response);
     }
+  };
+
+  const handlePagination = (event) => {
+    const selectedPage = event.selected + 1;
+    setPage(selectedPage, () => {
+      getAllProduct();
+    });
   };
 
   const handleClose = () => setShow(false);
@@ -24,7 +35,7 @@ const Product = () => {
 
   useEffect(() => {
     getAllProduct();
-  }, []);
+  }, [page, paginate.limit]);
 
   return (
     <>
@@ -114,7 +125,23 @@ const Product = () => {
             <h1 className="text-center mb-5 pb-4">No Data</h1>
           )}
         </Row>
-        <Row></Row>
+        <Row>
+          <div className="mt-1 d-flex justify-content-center">
+            {" "}
+            <Pagination
+              previousLabel={null}
+              nextLabel={null}
+              breakLabel={"..."}
+              pageCount={paginate.totalPage}
+              onPageChange={handlePagination}
+              containerClassName={"pagination"}
+              pageClassName={"page-item"}
+              pageLinkClassName={"page-link"}
+              disabledClassName={"disabled"}
+              activeClassName={"active"}
+            />
+          </div>
+        </Row>
       </Container>
     </>
   );

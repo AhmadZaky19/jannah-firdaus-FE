@@ -49,3 +49,35 @@
   font-size: 13px;
   margin-top: 10px;
 }
+/* ------------------------------ */
+
+.pagination {
+  margin-top: 50px;
+  margin-bottom: 0;
+  list-style: none;
+}
+
+.page-item {
+  margin-right: 0.46875rem;
+}
+
+.page-item.active .page-link {
+  outline: none;
+  color: #ffffff !important;
+}
+
+.page-link {
+  padding: 0.5rem;
+  border-radius: 0.5rem !important;
+  font-size: 18px;
+}
+
+.page-link:focus {
+  box-shadow: none;
+}
+
+li.break {
+  margin: auto !important;
+  margin-left: -7.5px !important;
+  padding: 0 0.46875rem !important;
+}
