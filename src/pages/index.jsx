@@ -4,14 +4,18 @@ import { Container, Row, Col, Button, Form, Card, Modal, InputGroup } from "reac
 import { Search } from "react-bootstrap-icons";
 import Pagination from "react-paginate";
 import { useHistory } from "react-router-dom";
-import { getDataProduct } from "../stores/actions/product";
+import { toast, ToastContainer } from "react-toastify";
+import { getDataProduct, deleteProduct } from "../stores/actions/product";
 
 const Product = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
   const [show1, setShow1] = useState(false);
-  const [show2, setShow2] = useState(false);
+  const [show2, setShow2] = useState({
+    data: null,
+    show: false
+  });
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [paginate, setPaginate] = useState({ limit: 4, totalPage: 1 });
@@ -47,10 +51,25 @@ const Product = () => {
     });
   };
 
+  const handleDeleteProduct = () => {
+    dispatch(deleteProduct(show2.data))
+      .then(() => {
+        dispatch(getDataProduct(search, "", "", page, paginate.limit)).then((res) => {
+          setProducts(res.value.data.data);
+          toast.success("Sukses menghapus produk");
+          handleClose2();
+        });
+      })
+      .catch(() => {
+        toast.error("Tidak berhasil menghapus produk");
+        handleClose2();
+      });
+  };
+
   const handleClose1 = () => setShow1(false);
-  const handleClose2 = () => setShow2(false);
+  const handleClose2 = () => setShow2({ data: null, show: false });
   const handleShow1 = () => setShow1(true);
-  const handleShow2 = () => setShow2(true);
+  const handleShow2 = (id) => setShow2({ data: id, show: true });
 
   useEffect(() => {
     getAllProduct();
@@ -59,6 +78,7 @@ const Product = () => {
   return (
     <>
       <Container className="mt-4">
+        <ToastContainer />
         <Modal show={show1} onHide={handleClose1}>
           <Modal.Header closeButton>
             <Modal.Title>Tambah produk</Modal.Title>
@@ -89,19 +109,6 @@ const Product = () => {
             </Button>
             <Button variant="primary" onClick={handleClose1}>
               Save Changes
-            </Button>
-          </Modal.Footer>
-        </Modal>
-        <Modal show={show2} onHide={handleClose2}>
-          <Modal.Body>
-            <h1>Hapus produk ?</h1>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose2}>
-              Tidak
-            </Button>
-            <Button variant="primary" onClick={handleClose2}>
-              Ya
             </Button>
           </Modal.Footer>
         </Modal>
@@ -149,7 +156,7 @@ const Product = () => {
                     <Button
                       variant="danger"
                       className="card__product--button--delete"
-                      onClick={handleShow2}
+                      onClick={() => handleShow2(newItem.id)}
                     >
                       Delete
                     </Button>
@@ -158,9 +165,22 @@ const Product = () => {
               );
             })
           ) : (
-            <h1 className="text-center mb-5 pb-4">No Data</h1>
+            <h1 className="text-center mt-5 pb-4">No Data</h1>
           )}
         </Row>
+        <Modal show={show2.show} onHide={handleClose2}>
+          <Modal.Body>
+            <h3>Hapus produk?</h3>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose2}>
+              Tidak
+            </Button>
+            <Button variant="primary" onClick={handleDeleteProduct}>
+              Ya
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <Row>
           <div className="mt-1 d-flex justify-content-center">
             {" "}
