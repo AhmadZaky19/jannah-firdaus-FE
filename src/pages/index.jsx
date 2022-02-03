@@ -5,7 +5,12 @@ import { Search } from "react-bootstrap-icons";
 import Pagination from "react-paginate";
 import { useHistory } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { getDataProduct, deleteProduct, postProduct } from "../stores/actions/product";
+import {
+  getDataProduct,
+  deleteProduct,
+  postProduct,
+  updateProduct
+} from "../stores/actions/product";
 
 const Product = () => {
   const dispatch = useDispatch();
@@ -119,6 +124,25 @@ const Product = () => {
       });
   };
 
+  const handleUpdateProduct = (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    for (const item in data) {
+      formData.append(item, data[item]);
+    }
+    dispatch(updateProduct(data.id, formData))
+      .then(() => {
+        dispatch(getDataProduct(search, "", "", page, paginate.limit)).then((res) => {
+          setProducts(res.value.data.data);
+        });
+        toast.success("Berhasil mengubah produk");
+        handleClose1();
+      })
+      .catch((error) => {
+        toast.error("Tidak berhasil mengubah produk");
+      });
+  };
+
   const handleClose1 = () => {
     setShow1(false),
       setData({
@@ -138,6 +162,7 @@ const Product = () => {
     setShow1(true);
     setIsUpdate(true);
     setData({
+      id: item.id,
       productName: item.productName,
       productImage: item.productImage,
       price: item.price,
@@ -199,8 +224,8 @@ const Product = () => {
             <Button variant="secondary" onClick={handleClose1}>
               Batal
             </Button>
-            <Button variant="primary" onClick={handlePostProduct}>
-              Tambah produk
+            <Button variant="primary" onClick={!isUpdate ? handlePostProduct : handleUpdateProduct}>
+              {!isUpdate ? "Tambah produk" : "Ubah produk"}
             </Button>
           </Modal.Footer>
         </Modal>
