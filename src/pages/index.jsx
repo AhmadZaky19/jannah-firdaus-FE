@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Container, Row, Col, Button, Form, Card, Modal, InputGroup } from "react-bootstrap";
 import { Search } from "react-bootstrap-icons";
 import Pagination from "react-paginate";
 import { useHistory } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { getDataProduct, deleteProduct } from "../stores/actions/product";
+import { getDataProduct, deleteProduct, postProduct } from "../stores/actions/product";
 
 const Product = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  const [isUpdate, setIsUpdate] = useState(false);
   const [show1, setShow1] = useState(false);
   const [show2, setShow2] = useState({
     data: null,
@@ -20,6 +21,15 @@ const Product = () => {
   const [page, setPage] = useState(1);
   const [paginate, setPaginate] = useState({ limit: 4, totalPage: 1 });
   const [search, setSearch] = useState("");
+  const [data, setData] = useState({
+    id: "",
+    productName: "",
+    productImage: null,
+    price: "",
+    stock: ""
+  });
+
+  const target = useRef(data.productImage);
 
   const getAllProduct = async () => {
     try {
@@ -66,10 +76,74 @@ const Product = () => {
       });
   };
 
-  const handleClose1 = () => setShow1(false);
+  const handleFile = (e) => {
+    setData({ ...data, productImage: e.target.files[0] });
+  };
+
+  const handleChangeText = (e) => {
+    setData({
+      ...data,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handlePostProduct = (e) => {
+    e.preventDefault();
+    const { productName, productImage, price, stock } = data;
+    const setData = {
+      productName,
+      productImage,
+      price,
+      stock
+    };
+    const formImage = new FormData();
+    for (const item in setData) {
+      formImage.append(item, setData[item]);
+    }
+    for (const data in setData) {
+      if (!setData[data]) {
+        toast.error("Semua kolom harus terisi");
+        return false;
+      }
+    }
+    dispatch(postProduct(formImage))
+      .then(() => {
+        dispatch(getDataProduct(search, "", "", page, paginate.limit)).then((res) => {
+          setProducts(res.value.data.data);
+        });
+        toast.success("Berhasil menambah produk");
+        handleClose1();
+      })
+      .catch((error) => {
+        toast.error("Ukuran file gambar tidak lebih dari 100kb");
+      });
+  };
+
+  const handleClose1 = () => {
+    setShow1(false),
+      setData({
+        productName: "",
+        productImage: null,
+        price: "",
+        stock: ""
+      });
+  };
   const handleClose2 = () => setShow2({ data: null, show: false });
-  const handleShow1 = () => setShow1(true);
+  const handleShow1 = () => {
+    setShow1(true);
+    setIsUpdate(false);
+  };
   const handleShow2 = (id) => setShow2({ data: id, show: true });
+  const handleShow3 = (item) => {
+    setShow1(true);
+    setIsUpdate(true);
+    setData({
+      productName: item.productName,
+      productImage: item.productImage,
+      price: item.price,
+      stock: item.stock
+    });
+  };
 
   useEffect(() => {
     getAllProduct();
@@ -81,34 +155,52 @@ const Product = () => {
         <ToastContainer />
         <Modal show={show1} onHide={handleClose1}>
           <Modal.Header closeButton>
-            <Modal.Title>Tambah produk</Modal.Title>
+            <Modal.Title>{!isUpdate ? "Tambah produk" : "Ubah produk"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                 <Form.Label>Nama Produk</Form.Label>
-                <Form.Control type="text" placeholder="Nama produk..." />
+                <Form.Control
+                  type="text"
+                  placeholder="Nama produk..."
+                  onChange={handleChangeText}
+                  name="productName"
+                  value={data.productName}
+                />
               </Form.Group>
               <Form.Group controlId="formFile" className="mb-3">
-                <Form.Label>Default file input example</Form.Label>
-                <Form.Control type="file" />
+                <Form.Label>Gambar Produk</Form.Label>
+                <Form.Control type="file" onChange={handleFile} name="productImage" ref={target} />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                 <Form.Label>Stok</Form.Label>
-                <Form.Control type="text" placeholder="Stok produk..." />
+                <Form.Control
+                  type="number"
+                  placeholder="Stok produk..."
+                  onChange={handleChangeText}
+                  name="stock"
+                  value={data.stock}
+                />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                 <Form.Label>Harga</Form.Label>
-                <Form.Control type="text" placeholder="Harga produk..." />
+                <Form.Control
+                  type="number"
+                  placeholder="Harga produk..."
+                  onChange={handleChangeText}
+                  name="price"
+                  value={data.price}
+                />
               </Form.Group>
             </Form>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleClose1}>
-              Close
+              Batal
             </Button>
-            <Button variant="primary" onClick={handleClose1}>
-              Save Changes
+            <Button variant="primary" onClick={handlePostProduct}>
+              Tambah produk
             </Button>
           </Modal.Footer>
         </Modal>
@@ -142,7 +234,7 @@ const Product = () => {
                     className="card__product--img"
                     src={
                       newItem.productImage
-                        ? `${process.env.REACT_APP_URL_BACKEND}uploads/${newItem.productImage}`
+                        ? `${process.env.REACT_APP_URL_BACKEND}products/${newItem.productImage}`
                         : "https://www.a1hosting.net/wp-content/themes/arkahost/assets/images/default.jpg"
                     }
                   />
@@ -150,7 +242,10 @@ const Product = () => {
                     <Card.Title className="card__product--title">{newItem.productName}</Card.Title>
                     <Card.Text className="card__product--stock">Stok {newItem.stock}</Card.Text>
                     <Card.Text className="card__product--price">{newItem.price}</Card.Text>
-                    <Button className="card__product--button--update" onClick={handleShow1}>
+                    <Button
+                      className="card__product--button--update"
+                      onClick={() => handleShow3(item)}
+                    >
                       Update
                     </Button>
                     <Button
@@ -168,7 +263,7 @@ const Product = () => {
             <h1 className="text-center mt-5 pb-4">No Data</h1>
           )}
         </Row>
-        <Modal show={show2.show} onHide={handleClose2}>
+        <Modal show={show2.show} onHide={handleClose2} centered>
           <Modal.Body>
             <h3>Hapus produk?</h3>
           </Modal.Body>
