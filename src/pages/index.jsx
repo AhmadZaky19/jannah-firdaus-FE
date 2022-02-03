@@ -3,24 +3,41 @@ import { useDispatch } from "react-redux";
 import { Container, Row, Col, Button, Form, Card, Modal, InputGroup } from "react-bootstrap";
 import { Search } from "react-bootstrap-icons";
 import Pagination from "react-paginate";
+import { useHistory } from "react-router-dom";
 import { getDataProduct } from "../stores/actions/product";
 
 const Product = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const [show, setShow] = useState(false);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [paginate, setPaginate] = useState({ limit: 4, totalPage: 1 });
+  const [search, setSearch] = useState("");
 
   const getAllProduct = async () => {
     try {
-      const response = await dispatch(getDataProduct("", "", "", page, paginate.limit));
+      const response = await dispatch(getDataProduct(search, "", "", page, paginate.limit));
       setProducts(response.value.data.data);
       setPaginate({ ...paginate, totalPage: response.value.data.pagination.totalPage });
     } catch (error) {
       Error(error.response);
     }
+  };
+
+  const handleSearch = (event) => {
+    const searchValue = event.target.value;
+    if (event.key === "Enter") {
+      dispatch(getDataProduct(search, "", "", "", ""))
+        .then((response) => {
+          const newData = response.value.data.data;
+          products = newData;
+          history.push(`/?search=${searchValue}`);
+        })
+        .catch((error) => new Error(error.message));
+    }
+    setSearch(searchValue);
   };
 
   const handlePagination = (event) => {
@@ -78,7 +95,7 @@ const Product = () => {
             <Button onClick={handleShow}>Tambah produk</Button>
           </Col>
           <Col md={10}>
-            <InputGroup className="mb-1">
+            <InputGroup className="mb-1" onKeyPress={handleSearch}>
               <InputGroup.Text>
                 <Search color="black" size={16} />
               </InputGroup.Text>
