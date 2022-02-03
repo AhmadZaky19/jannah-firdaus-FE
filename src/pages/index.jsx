@@ -10,7 +10,8 @@ const Product = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const [show, setShow] = useState(false);
+  const [show1, setShow1] = useState(false);
+  const [show2, setShow2] = useState(false);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [paginate, setPaginate] = useState({ limit: 4, totalPage: 1 });
@@ -30,9 +31,8 @@ const Product = () => {
     const searchValue = event.target.value;
     if (event.key === "Enter") {
       dispatch(getDataProduct(search, "", "", "", ""))
-        .then((response) => {
-          const newData = response.value.data.data;
-          products = newData;
+        .then((res) => {
+          setProducts(res.value.data.data);
           history.push(`/?search=${searchValue}`);
         })
         .catch((error) => new Error(error.message));
@@ -47,8 +47,10 @@ const Product = () => {
     });
   };
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleClose1 = () => setShow1(false);
+  const handleClose2 = () => setShow2(false);
+  const handleShow1 = () => setShow1(true);
+  const handleShow2 = () => setShow2(true);
 
   useEffect(() => {
     getAllProduct();
@@ -57,7 +59,7 @@ const Product = () => {
   return (
     <>
       <Container className="mt-4">
-        <Modal show={show} onHide={handleClose}>
+        <Modal show={show1} onHide={handleClose1}>
           <Modal.Header closeButton>
             <Modal.Title>Tambah produk</Modal.Title>
           </Modal.Header>
@@ -82,17 +84,30 @@ const Product = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
+            <Button variant="secondary" onClick={handleClose1}>
               Close
             </Button>
-            <Button variant="primary" onClick={handleClose}>
+            <Button variant="primary" onClick={handleClose1}>
               Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={show2} onHide={handleClose2}>
+          <Modal.Body>
+            <h1>Hapus produk ?</h1>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose2}>
+              Tidak
+            </Button>
+            <Button variant="primary" onClick={handleClose2}>
+              Ya
             </Button>
           </Modal.Footer>
         </Modal>
         <Row>
           <Col md={2}>
-            <Button onClick={handleShow}>Tambah produk</Button>
+            <Button onClick={handleShow1}>Tambah produk</Button>
           </Col>
           <Col md={10}>
             <InputGroup className="mb-1" onKeyPress={handleSearch}>
@@ -128,10 +143,14 @@ const Product = () => {
                     <Card.Title className="card__product--title">{newItem.productName}</Card.Title>
                     <Card.Text className="card__product--stock">Stok {newItem.stock}</Card.Text>
                     <Card.Text className="card__product--price">{newItem.price}</Card.Text>
-                    <Button className="card__product--button--update" onClick={handleShow}>
+                    <Button className="card__product--button--update" onClick={handleShow1}>
                       Update
                     </Button>
-                    <Button variant="danger" className="card__product--button--delete">
+                    <Button
+                      variant="danger"
+                      className="card__product--button--delete"
+                      onClick={handleShow2}
+                    >
                       Delete
                     </Button>
                   </Card.Body>
