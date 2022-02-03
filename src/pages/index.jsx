@@ -179,7 +179,7 @@ const Product = () => {
       <Container className="mt-4">
         <ToastContainer />
         <Modal show={show1} onHide={handleClose1}>
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>{!isUpdate ? "Tambah produk" : "Ubah produk"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
