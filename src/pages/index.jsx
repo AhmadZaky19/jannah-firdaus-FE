@@ -271,14 +271,14 @@ const Product = () => {
                       className="card__product--button--update"
                       onClick={() => handleShow3(item)}
                     >
-                      Update
+                      Ubah
                     </Button>
                     <Button
                       variant="danger"
                       className="card__product--button--delete"
                       onClick={() => handleShow2(newItem.id)}
                     >
-                      Delete
+                      Hapus
                     </Button>
                   </Card.Body>
                 </Card>
