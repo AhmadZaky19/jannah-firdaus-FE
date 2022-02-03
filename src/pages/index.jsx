@@ -259,7 +259,7 @@ const Product = () => {
                     className="card__product--img"
                     src={
                       newItem.productImage
-                        ? `${process.env.REACT_APP_URL_BACKEND}products/${newItem.productImage}`
+                        ? `${process.env.REACT_APP_URL_BACKEND}/prod/${newItem.productImage}`
                         : "https://www.a1hosting.net/wp-content/themes/arkahost/assets/images/default.jpg"
                     }
                   />
